@@ -2,12 +2,14 @@
 class InjectX {
   InjectX._();
   static final Map _instances = Map();
-  // Add the instance
-  static add<T>(T instance) {
+  
+  /// Add the instance and return it so it can be assigned
+  static T add<T>(T instance) {
     _instances.putIfAbsent(T.toString(), () => instance);
+    return instance;
   }
 
-  // Remove the instance
+  /// Remove the instance
   static void remove<T>() {
     final instance = get<T>();
     try {

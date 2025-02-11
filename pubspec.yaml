@@ -1,6 +1,6 @@
 name: inject_x
 description: "A minimalistic Dependency Injestion solution"
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/stefalda/inject_x
 issue_tracker: https://github.com/stefalda/inject_x/issues
 

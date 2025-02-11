@@ -43,6 +43,13 @@ void main() {
       expect(retrieved.value, equals('test1'));
     });
 
+    test('should return the instance it\'s adding', () {
+      final instance = TestClass1();
+      final instance2 = InjectX.add<TestClass1>(instance);
+
+      expect(instance2, equals(instance));
+    });
+
     test('should handle multiple different types', () {
       final instance1 = TestClass1();
       final instance2 = TestClass2();

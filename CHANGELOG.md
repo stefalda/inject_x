@@ -5,3 +5,7 @@
 ## 0.0.2
 
 - Automated publishing to pub.dev
+
+## 0.0.3
+
+- Return the instance it's adding in the method add
