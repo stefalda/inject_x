@@ -1,6 +1,6 @@
 name: inject_x
 description: "A minimalistic Dependency Injestion solution"
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/stefalda/inject_x
 issue_tracker: https://github.com/stefalda/inject_x/issues
 
@@ -8,7 +8,7 @@ environment:
   sdk: ^3.6.1
 
 # Add regular dependencies here.
-dependencies:
+#dependencies:
   # path: ^1.8.0
 
 dev_dependencies:
