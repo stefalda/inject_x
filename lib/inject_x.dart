@@ -2,7 +2,7 @@
 class InjectX {
   InjectX._();
   static final Map _instances = Map();
-  
+
   /// Add the instance and return it so it can be assigned
   static T add<T>(T instance) {
     _instances.putIfAbsent(T.toString(), () => instance);
@@ -24,7 +24,7 @@ class InjectX {
   static T get<T>() {
     if (!_instances.containsKey(T.toString())) {
       throw StateError('No instance registered for type ${T.toString()}. '
-          'Make sure to register it using Injectables.add<${T.toString()}>() first.');
+          'Make sure to register it using InjectX.add<${T.toString()}>() first.');
     }
     return _instances[T.toString()];
   }
