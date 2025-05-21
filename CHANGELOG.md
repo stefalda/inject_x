@@ -9,3 +9,7 @@
 ## 0.0.3
 
 - Return the instance it's adding in the method add
+
+## 0.0.4
+
+- Improve dart compliance
