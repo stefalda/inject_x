@@ -17,7 +17,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  inject_x: ^0.0.1
+  inject_x: ^0.0.3
 ```
 
 ## Usage
@@ -49,7 +49,7 @@ class DatabaseService {
 }
 
 // Register the service
-InjectX.add<DatabaseService>(DatabaseService());
+final dbService = InjectX.add<DatabaseService>(DatabaseService());
 
 // Later, when removing the service
 InjectX.remove<DatabaseService>(); // dispose() will be called automatically
@@ -108,8 +108,7 @@ class AuthService {
 
 void main() {
   // Register services
-  final userService = UserService();
-  InjectX.add<UserService>(userService);
+  final userService = InjectX.add<UserService>(UserService());
   
   // Create dependent service
   final authService = AuthService(inject<UserService>());
