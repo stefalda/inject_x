@@ -17,7 +17,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  inject_x: ^0.0.3
+  inject_x: ^0.0.4
 ```
 
 ## Usage
