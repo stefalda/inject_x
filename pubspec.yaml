@@ -1,6 +1,6 @@
 name: inject_x
 description: "A minimalistic Dependency Injestion solution similar to the Angular one"
-version: 0.0.4
+version: 0.0.5
 homepage: https://github.com/stefalda/inject_x
 issue_tracker: https://github.com/stefalda/inject_x/issues
 

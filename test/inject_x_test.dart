@@ -27,7 +27,37 @@ class ThrowingDisposableClass {
   }
 }
 
+class InitAwareClass {
+  bool initialized = false;
+
+  void init() {
+    initialized = true;
+  }
+}
+
+class InitCounterClass {
+  int initCalls = 0;
+
+  void init() {
+    initCalls++;
+  }
+}
+
+class AsyncInitClass {
+  bool initialized = false;
+  int callCount = 0;
+
+  Future<void> init() async {
+    callCount++;
+    await Future.delayed(Duration(milliseconds: 50));
+    initialized = true;
+  }
+}
+
 void main() {
+  tearDown(() {
+    InjectX.clear();
+  });
   group('InjectX', () {
     setUp(() {
       // Clear all instances before each test
@@ -166,6 +196,77 @@ void main() {
 
       InjectX.remove<ThrowingDisposableClass>();
       expect(InjectX.length, equals(0));
+    });
+  });
+
+  group('Inject class with init', () {
+    test('should call init method once on first get', () {
+      final instance = InitAwareClass();
+      InjectX.add<InitAwareClass>(instance);
+
+      // Should not be initialized yet
+      expect(instance.initialized, isFalse);
+
+      // First get should trigger init
+      final retrieved = InjectX.get<InitAwareClass>();
+      expect(retrieved.initialized, isTrue);
+
+      // Further get should not re-call init (no change, still true)
+      final retrieved2 = InjectX.get<InitAwareClass>();
+      expect(identical(retrieved, retrieved2), isTrue);
+      expect(retrieved2.initialized, isTrue);
+    });
+
+    test('should call init only once even on multiple get', () {
+      final instance = InitCounterClass();
+      InjectX.add<InitCounterClass>(instance);
+
+      InjectX.get<InitCounterClass>();
+      InjectX.get<InitCounterClass>();
+      InjectX.get<InitCounterClass>();
+
+      expect(instance.initCalls, equals(1));
+    });
+  });
+
+  group('async init', () {
+    test('should call async init and await it', () async {
+      final instance = AsyncInitClass();
+      InjectX.add<AsyncInitClass>(instance);
+
+      expect(instance.initialized, isFalse);
+
+      final retrieved = await injectAsync<AsyncInitClass>();
+      expect(retrieved.initialized, isTrue);
+      expect(instance.callCount, equals(1));
+    });
+
+    test('should not call async init more than once', () async {
+      final instance = AsyncInitClass();
+      InjectX.add<AsyncInitClass>(instance);
+
+      await Future.wait([
+        injectAsync<AsyncInitClass>(),
+        injectAsync<AsyncInitClass>(),
+        injectAsync<AsyncInitClass>(),
+      ]);
+
+      expect(instance.callCount, equals(1));
+      expect(instance.initialized, isTrue);
+    });
+
+    test('should not await again after first init is done', () async {
+      final instance = AsyncInitClass();
+      InjectX.add<AsyncInitClass>(instance);
+
+      await injectAsync<AsyncInitClass>(); // First call triggers init
+
+      final stopwatch = Stopwatch()..start();
+      await injectAsync<AsyncInitClass>(); // Should return immediately
+      stopwatch.stop();
+
+      expect(stopwatch.elapsedMilliseconds < 10, isTrue,
+          reason: 'Second call should not await');
     });
   });
 }

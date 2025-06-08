@@ -1,6 +1,6 @@
 # InjectX
 
-A lightweight, easy-to-use service locator pattern implementation for Dart applications. This package provides a simple dependency injection container that helps manage application dependencies with minimal setup.
+A lightweight, easy-to-use service locator implementation for Dart applications. This package provides a simple dependency injection container that helps manage application dependencies with minimal setup.
 
 ## Features
 
@@ -8,7 +8,7 @@ A lightweight, easy-to-use service locator pattern implementation for Dart appli
 - Singleton instance management
 - Automatic disposal of services
 - Type-safe dependency injection
-- Angular-style inject function
+- Angular-style `inject` function
 - Zero external dependencies
 
 ## Installation
@@ -17,7 +17,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  inject_x: ^0.0.4
+  inject_x: ^0.0.5
 ```
 
 ## Usage
@@ -33,13 +33,49 @@ InjectX.add<AuthService>(AuthService());
 final userService = InjectX.get<UserService>();
 final authService = InjectX.get<AuthService>();
 
-// Alternative Angular-style injection
+// Alternatively, use Angular-style injection
 final userService = inject<UserService>();
+```
+
+### Init Method
+
+If your class defines an `init()` method, it will be called automatically **before the first injection**. This is useful when your service depends on other services that need to be resolved after construction — particularly in cases of circular dependencies.
+
+```dart
+class UserService {
+  late AuthService authService;
+
+  void init() {
+    authService = inject<AuthService>();
+  }
+}
+```
+
+The `init()` method is called **only once**, just before the first access via `get()` or `inject()`.
+
+### Async Init Method
+
+If your class has an `async` `init()` method (returning a `Future`), you can use `injectAsync<T>()` or `InjectX.getAsync<T>()` to ensure initialization is awaited before use.
+
+```dart
+class ConfigService {
+  String? config;
+
+  Future<void> init() async {
+    await Future.delayed(Duration(milliseconds: 100));
+    config = 'loaded';
+  }
+}
+
+void main() async {
+  InjectX.add(ConfigService());
+  final config = await injectAsync<ConfigService>();
+}
 ```
 
 ### Automatic Disposal
 
-The InjectX automatically handles disposal of services that implement a `dispose` method:
+InjectX automatically calls a service’s `dispose()` method if it exists when the service is removed:
 
 ```dart
 class DatabaseService {
@@ -49,9 +85,9 @@ class DatabaseService {
 }
 
 // Register the service
-final dbService = InjectX.add<DatabaseService>(DatabaseService());
+InjectX.add<DatabaseService>(DatabaseService());
 
-// Later, when removing the service
+// Later, remove it
 InjectX.remove<DatabaseService>(); // dispose() will be called automatically
 ```
 
@@ -60,21 +96,23 @@ InjectX.remove<DatabaseService>(); // dispose() will be called automatically
 ### Methods
 
 - `add<T>(T instance)`: Register a new dependency
-- `get<T>()`: Retrieve a registered dependency
-- `remove<T>()`: Remove a registered dependency and dispose if applicable
-- `length`: Get the number of registered dependencies
-- `clear`: Remove all registered dependencies performing dispose on each one (if supported)
+- `get<T>()`: Retrieve a registered dependency, calling `init()` if defined
+- `getAsync<T>()`: Retrieve a registered dependency, awaiting `init()` if it's async
+- `remove<T>()`: Remove a registered dependency and call `dispose()` if defined
+- `length`: The number of registered dependencies
+- `clear()`: Remove all dependencies and dispose each (if supported)
 
 ### Helper Functions
 
-- `T inject<T>()`: Angular-style dependency injection helper
+- `inject<T>()`: Angular-style helper to call `InjectX.get<T>()`
+- `injectAsync<T>()`: Angular-style helper for services with async `init()`
 
 ## Error Handling
 
-The package includes proper error handling for common scenarios:
+The package includes error handling for common scenarios:
 
 ```dart
-// Attempting to retrieve non-existent dependency
+// Attempting to retrieve a non-existent dependency
 try {
   final service = InjectX.get<UnregisteredService>();
 } catch (e) {
@@ -84,14 +122,12 @@ try {
 
 ## Best Practices
 
-1. Register dependencies early in your application lifecycle
-2. Use meaningful type parameters for better code clarity
-3. Implement dispose methods for services that need cleanup
-4. Remove services when they're no longer needed
+1. Register all dependencies early in your app lifecycle
+2. Use meaningful type parameters for clarity
+3. Implement `dispose()` for services that require cleanup
+4. Remove services when no longer needed (e.g., on module unload)
 
 ## Example
-
-Here's a complete example showing various features:
 
 ```dart
 class UserService {
@@ -102,22 +138,21 @@ class UserService {
 
 class AuthService {
   final UserService userService;
-  
+
   AuthService(this.userService);
 }
 
 void main() {
   // Register services
-  final userService = InjectX.add<UserService>(UserService());
-  
-  // Create dependent service
-  final authService = AuthService(inject<UserService>());
-  InjectX.add<AuthService>(authService);
-  
+  InjectX.add<UserService>(UserService());
+
+  // Register a dependent service
+  InjectX.add<AuthService>(AuthService(inject<UserService>()));
+
   // Use services
-  final users = inject<UserService>();
-  final auth = inject<AuthService>();
-  
+  final userService = inject<UserService>();
+  final authService = inject<AuthService>();
+
   // Cleanup
   InjectX.remove<AuthService>();
   InjectX.remove<UserService>();
@@ -126,8 +161,9 @@ void main() {
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+Contributions are welcome! Please feel free to submit a pull request.  
+For major changes, open an issue first to discuss what you'd like to propose.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.

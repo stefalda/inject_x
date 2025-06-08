@@ -13,3 +13,8 @@
 ## 0.0.4
 
 - Improve dart compliance
+
+## 0.0.5
+
+- Implementation of a call to an init() method to allow circular references
+- Added support for async get where the called init method is async
