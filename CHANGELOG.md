@@ -18,3 +18,4 @@
 
 - Implementation of a call to an init() method to allow circular references
 - Added support for async get where the called init method is async
+- Revised internal working (use Type instead of String as key, to avoid possible collisionss)
